@@ -1,0 +1,19 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.ceboxxx.simplelog'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.ceboxxx.simplelog'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+    // Public development key: allows installing subsequent CI APKs as updates.
+    def devKey = layout.buildDirectory.file('development.keystore').get().asFile
+    devKey.parentFile.mkdirs()
+    devKey.bytes = java.util.Base64.decoder.decode(file('development.keystore.base64').text.trim())
+    signingConfigs { debug { storeFile devKey; storePassword 'android'; keyAlias 'androiddebugkey'; keyPassword 'android' } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { testImplementation 'junit:junit:4.13.2' }
