@@ -1,6 +1,10 @@
 package com.ceboxxx.simplelog;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.SharedPreferences;
+import android.view.ViewGroup;
+import java.util.Locale;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -26,6 +30,7 @@ public final class MainActivity extends Activity {
     private Button permission, refresh, export;
     private ArrayAdapter<String> adapter;
     private boolean loading;
+    private SharedPreferences colors;
     private int dp(int n) { return Math.round(n * getResources().getDisplayMetrics().density); }
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
@@ -64,11 +69,42 @@ public final class MainActivity extends Activity {
         actions.addView(refresh, new LinearLayout.LayoutParams(0, -2, 1));
         actions.addView(export, new LinearLayout.LayoutParams(0, -2, 1)); root.addView(actions);
         ListView list = new ListView(this);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        colors = getSharedPreferences("row_colors", MODE_PRIVATE);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1) {
+            @Override public View getView(int position, View recycled, ViewGroup parent) {
+                TextView row = (TextView) super.getView(position, recycled, parent);
+                String label = labelOf(getItem(position));
+                String key = label.toLowerCase(Locale.ROOT);
+                boolean system = key.contains("administrador del sistema")
+                    || key.contains("system manager") || key.equals("com.hihonor.systemmanager")
+                    || key.equals("com.huawei.systemmanager") || key.equals("com.miui.securitycenter");
+                row.setBackgroundColor(colors.getInt(key, system ? Color.rgb(224,224,224) : Color.TRANSPARENT));
+                row.setTextColor(Color.rgb(20,30,45));
+                return row;
+            }
+        };
+        list.setOnItemClickListener((parent, view, position, id) -> chooseColor(labelOf(adapter.getItem(position))));
         list.setAdapter(adapter); root.addView(list, new LinearLayout.LayoutParams(-1, 0, 1));
         TextView note = new TextView(this);
-        note.setText("Últimas 1.000 entradas; el TXT incluye todas. Recogida periódica sujeta al ahorro de batería. Abre la app tras reiniciar y cada pocos días.");
+        note.setText("Toca una entrada para elegir el color de esa aplicación. Últimas 1.000 entradas; el TXT incluye todas. Recogida periódica sujeta al ahorro de batería. Abre la app tras reiniciar y cada pocos días.");
         note.setTextSize(12); note.setPadding(0, dp(8), 0, dp(12)); root.addView(note);
+    }
+    private static String labelOf(String line) {
+        int separator = line.indexOf(" - ");
+        return separator < 0 ? line : line.substring(separator + 3);
+    }
+    private void chooseColor(String label) {
+        String[] names = {"Verde", "Azul", "Amarillo", "Rosa", "Lila", "Naranja", "Gris", "Sin color", "Restablecer predeterminado"};
+        int[] values = {0xFFC8E6C9, 0xFFBBDEFB, 0xFFFFF9C4, 0xFFF8BBD0, 0xFFE1BEE7, 0xFFFFE0B2, 0xFFE0E0E0, Color.TRANSPARENT};
+        String key = label.toLowerCase(Locale.ROOT);
+        new AlertDialog.Builder(this).setTitle("Color: " + label)
+            .setItems(names, (dialog, selected) -> {
+                SharedPreferences.Editor editor = colors.edit();
+                if (selected == values.length) editor.remove(key);
+                else editor.putInt(key, values[selected]);
+                editor.apply();
+                adapter.notifyDataSetChanged();
+            }).setNegativeButton("Cancelar", null).show();
     }
     @Override public void onResume() { super.onResume(); load(); }
     private void load() {

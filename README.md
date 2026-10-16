@@ -18,6 +18,10 @@ App Android mínima (Android 8.0 o posterior) que guarda localmente cuándo una 
 
 **Exportar TXT** guarda todas las entradas con el selector de documentos de Android. No necesita permiso de almacenamiento. La pantalla muestra las últimas 1.000; la base de datos conserva todas hasta borrar los datos o desinstalar la app. El historial se presenta en la zona horaria actual del móvil.
 
+## Colores del historial
+
+Toca una entrada para elegir su fondo. Se aplica a todas las entradas con el mismo nombre de aplicación, antiguas y futuras, y se guarda localmente. Puedes elegir entre ocho opciones, quitar el color o restablecer el predeterminado. Administrador del sistema aparece en gris por defecto. La exportación TXT conserva el texto sin colores. Instala la nueva versión sobre la anterior para conservar el historial.
+
 ## Qué registra
 
 - Abrir una app o volver a ella desde otra aplicación o desde el escritorio.
